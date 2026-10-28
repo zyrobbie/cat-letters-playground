@@ -1,0 +1,19 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {stages,createBall,step,boxFootprint,catFootprint,collideRect,circleOverlapsRect,sceneDepth,makeBoards,boardFits,advanceElapsed} from '../public/physics.mjs';
+const rect=boxFootprint(stages[0]),cx=(rect.left+rect.right)/2,cy=(rect.top+rect.bottom)/2;
+for(const [name,dx,dy] of [['left',-1,0],['right',1,0],['top',0,-1],['bottom',0,1],['top-left',-1,-1],['top-right',1,-1],['bottom-left',-1,1],['bottom-right',1,1]])for(const speed of [210,1200,10000])test(`solid box ${name} collision at speed ${speed}`,()=>{
+ const b=createBall(0),x=dx===0?cx:dx<0?rect.left:rect.right,y=dy===0?cy:dy<0?rect.top:rect.bottom,n=Math.hypot(dx,dy);
+ Object.assign(b,{x:x+dx/n*60,y:y+dy/n*60,vx:-dx/n*speed,vy:-dy/n*speed});
+ for(let k=0;k<60&&!b.boxHits;k++){step(b,[],stages[0],1/120);assert.ok(!circleOverlapsRect(b,rect),`${b.x},${b.y} inside solid`);}
+ assert.ok(b.boxHits>0,'must collide');assert.ok(b.vx*dx+b.vy*dy>=0,'must reflect away');
+});
+for(const [x,y] of [[cx,cy],[rect.left,rect.top],[rect.right,cy],[cx,rect.bottom]])test(`initial embedded circle safely recovered ${x},${y}`,()=>{const b={x,y,vx:1,vy:1,r:18};assert.equal(collideRect(b,rect),true);assert.equal(circleOverlapsRect(b,rect),false);assert.ok(Object.values(b).every(Number.isFinite));});
+test('high elapsed still collides with solid instead of tunneling',()=>{for(const dt of [.25,1.3,10]){const b=createBall(0);Object.assign(b,{x:rect.left-60,y:cy,vx:1200,vy:0});advanceElapsed(b,[],stages[0],dt);assert.ok(b.boxHits>0);assert.equal(circleOverlapsRect(b,rect),false);}});
+test('solid box is deeply immutable; board placement cannot occupy it',()=>{assert.ok(Object.isFrozen(stages[0].box));assert.throws(()=>{stages[0].box.x+=100},TypeError);assert.equal(boardFits({x:cx,y:cy,angle:0,length:200},stages[0]),false);});
+test('home cat body bounces ball but travel has no invisible cat collision',()=>{const r=catFootprint(stages[0]);for(const catPresent of [true,false]){const b=createBall(0);Object.assign(b,{x:r.right+30,y:(r.top+r.bottom)/2,vx:-210,vy:0});step(b,[],stages[0],.25,{catPresent});assert.equal(b.catHits>0,catPresent);}});
+test('depth keys sort ball behind and ahead of cat and solid box',()=>{for(const stage of stages){for(const kind of ['cat','box']){const depth=sceneDepth(kind,null,stage);assert.ok(sceneDepth('ball',{y:depth-25},stage)<depth);assert.ok(sceneDepth('ball',{y:depth+25},stage)>depth);}}});
+test('180 wrong layouts stay finite and never enter solid box',()=>{for(let index=0;index<3;index++)for(let k=0;k<60;k++){const b=createBall(index),boards=makeBoards(index);Object.assign(boards[0],{x:260+(k*43)%500,y:440+(k*37)%260,angle:(k*22.5)%180-90});let n=0;while(!b.arrived&&!b.settled&&n++<1000){step(b,boards,stages[index],1/120);assert.ok(Number.isFinite(b.x)&&Number.isFinite(b.y));assert.equal(circleOverlapsRect(b,boxFootprint(stages[index])),false,`stage${index} layout${k}`);}assert.ok(b.arrived||b.settled);}});
+
+test('assisted arrivals have a clear capture tween for every stage',async()=>{const {simulate,capturePathClear}=await import('../public/physics.mjs');for(let i=0;i<3;i++){const boards=makeBoards(i,true),b=simulate(i,boards).ball;assert.equal(b.arrived,true);assert.equal(capturePathClear(b,stages[i],true,boards),true);}});
+test('capture tween refuses intervening board, solid box and cat body',async()=>{const {capturePathClear,catchPoint}=await import('../public/physics.mjs');const s=stages[0],p=catchPoint(s),b={x:p.x-30,y:p.y,r:18};assert.equal(capturePathClear(b,s),true);assert.equal(capturePathClear(b,s,true,[{x:p.x-15,y:p.y,angle:90,length:100}]),false);assert.equal(capturePathClear({...b,x:s.box.x,y:s.box.y},s),false);assert.equal(capturePathClear({...b,x:s.goal.x+80,y:s.goal.y+15},s,true),false);});

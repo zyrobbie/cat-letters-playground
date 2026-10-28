@@ -6,7 +6,7 @@ export const layouts = [
  [{x:190,y:650},{x:540,y:710},{x:680,y:520}],
  [{x:330,y:710},{x:610,y:580},{x:440,y:535}],
 ];
-export function createLeaves(index=0){return layouts[index%layouts.length].map((p,i)=>({...p,id:i,kind:i,vx:0,vy:0,angle:[-20,30,70][i],spin:0,lift:0,r:[22,25,21][i],weight:[.8,1.15,.65][i],pinned:0,cooldown:0}));}
+export function createLeaves(index=0){return layouts[index%layouts.length].map((p,i)=>({...p,id:i,kind:i,vx:0,vy:0,angle:[-20,30,70][i],spin:0,lift:0,r:[28,31,27][i],weight:[.8,1.15,.65][i],pinned:0,cooldown:0}));}
 export function insideTray(l){return ((l.x-tray.x)/tray.rx)**2+((l.y-tray.y)/tray.ry)**2<1;}
 export function catDistance(l){return Math.hypot((l.x-cat.x)/(cat.rx+l.r),(l.y-cat.y)/(cat.ry+l.r*.55));}
 export function applyWind(leaves,from,to,{global=false,swirl=false}={}){const dx=to.x-from.x,dy=to.y-from.y,len=Math.hypot(dx,dy);if(!len)return;const strength=Math.min(180,len*2.2);for(const l of leaves){if(l.pinned>0)continue;const dist=Math.hypot(l.x-from.x,l.y-from.y),fall=global?1:Math.max(0,1-dist/240);if(!fall)continue;const nx=swirl?-(l.y-from.y)/(dist||1):dx/len,ny=swirl?(l.x-from.x)/(dist||1):dy/len;l.vx+=nx*strength*fall/l.weight;l.vy+=ny*strength*fall/l.weight;const speed=Math.hypot(l.vx,l.vy);if(speed>220){l.vx*=220/speed;l.vy*=220/speed;}l.spin+= (swirl?90:dx*.7-dy*.2)*fall/l.weight;l.spin=Math.max(-150,Math.min(150,l.spin));l.lift=Math.min(8,l.lift+strength*fall*.04);}}

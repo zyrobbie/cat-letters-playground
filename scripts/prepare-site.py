@@ -2,6 +2,10 @@
 import hashlib, json, os, pathlib, subprocess
 root = pathlib.Path('public').resolve()
 assert (root/'index.html').is_file(), 'Missing public/index.html'
+# The accepted cardboard-ball game remains byte-for-byte unchanged.
+for item in json.loads(pathlib.Path('scripts/root-v012-integrity.json').read_text()):
+    data = pathlib.Path(item['path']).read_bytes()
+    assert len(data) == item['bytes'] and hashlib.sha256(data).hexdigest() == item['sha256'], 'Root regression: '+item['path']
 allowed={'.html','.css','.js','.mjs','.json','.png','.jpg','.jpeg','.webp','.svg','.ico','.woff2','.mp3','.ogg','.wav','.txt'}
 for p in root.rglob('*'):
     assert not p.is_symlink(), f'Symlink not allowed: {p}'
@@ -13,7 +17,7 @@ for p in root.rglob('*'):
 # Runtime files only; the manifest intentionally excludes itself.
 entries=[]
 for p in sorted(root.rglob('*')):
-    if p.is_file() and p.name != 'version.json':
+    if p.is_file() and p != root/'version.json':
         b=p.read_bytes(); entries.append({'path':p.relative_to(root).as_posix(),'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
 (root/'version.json').write_text(json.dumps({'revision':os.environ.get('GITHUB_SHA','local'),'files':entries},ensure_ascii=False,indent=2)+'\n')
 print(f'Validated {len(entries)} static files')

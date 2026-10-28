@@ -1,1 +1,11 @@
-{"name":"cat-letters-playground","version":"0.1.2","private":true,"type":"module","scripts":{"test":"node --test tests/*.test.mjs","check":"node --check public/game.mjs && node --check public/physics.mjs","serve":"python3 -m http.server 8091 --directory public"}}
+{
+  "name": "cat-letters-playground",
+  "version": "0.1.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "python3 scripts/run-tests.py",
+    "check": "python3 scripts/prepare-site.py",
+    "serve": "python3 -m http.server 8091 --directory public"
+  }
+}

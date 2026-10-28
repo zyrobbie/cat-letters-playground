@@ -20,3 +20,11 @@ Node 22+ 用于测试；运行 `npm test` 和 `npm run check`。
 房间与狸花猫基于 `zyrobbie/travel-cat-planner` 中既有产品视觉资产。游戏场景局部去除背景的原静态球，以免与交互球重影；保留家庭家具与布局。玩球与伸懒腰姿势复用原有透明角色图。纸板、封闭纸箱与黄色条纹球沿用此视觉体系新增。
 
 只有本试片所需的代码和展示资产被发布；不携带主产品源码、会话、配置、账号数据或密钥。
+
+## Independent companion scenes
+
+- `/bag/`: 纸袋躲猫猫，见 [说明](docs/bag.md)。
+- `/wind/`: 窗边一阵风，见 [说明](docs/wind.md)。
+- `/`: 已验收的 v0.1.2 纸箱滚球保持原文件字节不变。
+
+Run `npm test` for all three games. CI verifies the accepted root resource hashes before publishing, then checks every live asset against its revision manifest.

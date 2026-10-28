@@ -1,0 +1,57 @@
+[
+  {
+    "path": "public/assets/ball.webp",
+    "bytes": 15328,
+    "sha256": "feea6481d9456171d5003af1a07b244e4cdae60f509eb830735feb22cdec7fa8"
+  },
+  {
+    "path": "public/assets/box-solid.webp",
+    "bytes": 19144,
+    "sha256": "3cf401e066e62cc431b9531a6b3f36cb6a16a01db0ad04ff5361bb5eccdab406"
+  },
+  {
+    "path": "public/assets/cat-play.webp",
+    "bytes": 52218,
+    "sha256": "5cc9ccc7ec9bde834bdea62cc5dce51b9308d2458e2dde9dcb2671ab8f9d7845"
+  },
+  {
+    "path": "public/assets/cat-stretch.webp",
+    "bytes": 52520,
+    "sha256": "5e5d8a8d94f334abbfbb3a4a1659e6776c892d931aa5bc5856a1f742142a912d"
+  },
+  {
+    "path": "public/assets/home.webp",
+    "bytes": 41796,
+    "sha256": "524af0f36741d123f70d5c9c446af5082e25b829f166eb09a1396f03284acb08"
+  },
+  {
+    "path": "public/assets/rail.webp",
+    "bytes": 7022,
+    "sha256": "a378ab83afe10ecb6d40aa4d0cd67c606ca731c118b254fe4cbfb5eb036b44d0"
+  },
+  {
+    "path": "public/assets/room-clean.webp",
+    "bytes": 95370,
+    "sha256": "1297d45169fd1d79d5772a6813a7bc31c41e308bb2a709b63b6a63d5ca52b436"
+  },
+  {
+    "path": "public/game.mjs",
+    "bytes": 13267,
+    "sha256": "d8c1a723ded8b4410839816f87f8b698bc548d2bf1dd9800f70c8d5849e96b07"
+  },
+  {
+    "path": "public/index.html",
+    "bytes": 5738,
+    "sha256": "69c30df02081609f37401afedd29e78c4fbb7af08967a50215781b809f35bdea"
+  },
+  {
+    "path": "public/physics.mjs",
+    "bytes": 6456,
+    "sha256": "625aa4a29c6568c687ffe58857f94299b6bb396a46b5eb733a67716783a2f880"
+  },
+  {
+    "path": "public/styles.css",
+    "bytes": 5977,
+    "sha256": "6f45ab5abce843329e3c5b91feaffa53f7cbe6686e0f6a31b0656a0c4c603e72"
+  }
+]

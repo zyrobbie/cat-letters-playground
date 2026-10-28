@@ -1,0 +1,18 @@
+export const bounds = {left:60,right:940,top:445,bottom:750};
+export const tray = {x:440,y:653,rx:145,ry:47};
+export const cat = {x:820,y:547,rx:67,ry:22,paw:{x:738,y:508}};
+export const layouts = [
+ [{x:260,y:560},{x:490,y:525},{x:650,y:660}],
+ [{x:190,y:650},{x:540,y:710},{x:680,y:520}],
+ [{x:330,y:710},{x:610,y:580},{x:440,y:535}],
+];
+export function createLeaves(index=0){return layouts[index%layouts.length].map((p,i)=>({...p,id:i,kind:i,vx:0,vy:0,angle:[-20,30,70][i],spin:0,lift:0,r:[22,25,21][i],weight:[.8,1.15,.65][i],pinned:0,cooldown:0}));}
+export function insideTray(l){return ((l.x-tray.x)/tray.rx)**2+((l.y-tray.y)/tray.ry)**2<1;}
+export function catDistance(l){return Math.hypot((l.x-cat.x)/(cat.rx+l.r),(l.y-cat.y)/(cat.ry+l.r*.55));}
+export function applyWind(leaves,from,to,{global=false,swirl=false}={}){const dx=to.x-from.x,dy=to.y-from.y,len=Math.hypot(dx,dy);if(!len)return;const strength=Math.min(180,len*2.2);for(const l of leaves){if(l.pinned>0)continue;const dist=Math.hypot(l.x-from.x,l.y-from.y),fall=global?1:Math.max(0,1-dist/240);if(!fall)continue;const nx=swirl?-(l.y-from.y)/(dist||1):dx/len,ny=swirl?(l.x-from.x)/(dist||1):dy/len;l.vx+=nx*strength*fall/l.weight;l.vy+=ny*strength*fall/l.weight;const speed=Math.hypot(l.vx,l.vy);if(speed>220){l.vx*=220/speed;l.vy*=220/speed;}l.spin+= (swirl?90:dx*.7-dy*.2)*fall/l.weight;l.spin=Math.max(-150,Math.min(150,l.spin));l.lift=Math.min(8,l.lift+strength*fall*.04);}}
+export function tapLeaf(leaves,id){const l=leaves.find(l=>l.id===id);if(!l||l.pinned>0)return;const dx=tray.x-l.x,dy=tray.y-l.y,d=Math.hypot(dx,dy)||1;l.vx+=dx/d*65/l.weight;l.vy+=dy/d*65/l.weight;const speed=Math.hypot(l.vx,l.vy);if(speed>220){l.vx*=220/speed;l.vy*=220/speed;}l.spin=Math.min(150,l.spin+55);l.lift=7;}
+function keepBounds(l){if(l.x<bounds.left+l.r){l.x=bounds.left+l.r;l.vx=Math.abs(l.vx)*.35;}if(l.x>bounds.right-l.r){l.x=bounds.right-l.r;l.vx=-Math.abs(l.vx)*.35;}if(l.y<bounds.top+l.r*.5){l.y=bounds.top+l.r*.5;l.vy=Math.abs(l.vy)*.35;}if(l.y>bounds.bottom-l.r*.5){l.y=bounds.bottom-l.r*.5;l.vy=-Math.abs(l.vy)*.35;}}
+function catCollide(l){const rx=cat.rx+l.r,ry=cat.ry+l.r*.55,dx=l.x-cat.x,dy=l.y-cat.y,q=Math.hypot(dx/rx,dy/ry);if(q<1){const a=Math.atan2(dy/ry,dx/rx);l.x=cat.x+Math.cos(a)*rx;l.y=cat.y+Math.sin(a)*ry;let nx=Math.cos(a)/rx,ny=Math.sin(a)/ry;const n=Math.hypot(nx,ny);nx/=n;ny/=n;const dot=l.vx*nx+l.vy*ny;if(dot<0){l.vx-=dot*1.35*nx;l.vy-=dot*1.35*ny;}return true;}return false;}
+export function advance(leaves,elapsed,{catPresent=true,catPlay=true}={}){let time=Math.min(8,Math.max(0,elapsed)),events=[];while(time>1e-8){const dt=Math.min(1/120,time);time-=dt;for(const l of leaves){l.cooldown=Math.max(0,l.cooldown-dt);if(l.pinned>0){l.pinned=Math.max(0,l.pinned-dt);l.vx=l.vy=l.spin=0;if(!catPresent){l.pinned=0;}else if(l.pinned===0){l.vx=-45;l.vy=20;l.spin=-45;events.push({kind:'release',id:l.id});}continue;}l.x+=l.vx*dt;l.y+=l.vy*dt;l.angle=(l.angle+l.spin*dt)%360;l.lift=Math.max(0,l.lift-dt*10);const drag=(insideTray(l)?4.6:1.25)*l.weight;l.vx*=Math.exp(-drag*dt);l.vy*=Math.exp(-drag*dt);l.spin*=Math.exp(-2.3*dt);keepBounds(l);if(catPresent)catCollide(l);if(catPresent&&catPlay&&!l.cooldown&&Math.hypot(l.x-cat.paw.x,l.y-cat.paw.y)<20&&Math.hypot(l.vx,l.vy)>12){l.pinned=1.1;l.cooldown=7;l.vx=l.vy=0;events.push({kind:'hold',id:l.id});}if(Math.abs(l.vx)<.15)l.vx=0;if(Math.abs(l.vy)<.15)l.vy=0;if(Math.abs(l.spin)<.15)l.spin=0;}}return events;}
+export function stopLeaves(leaves){for(const l of leaves){l.vx=l.vy=l.spin=l.lift=l.pinned=0;}}
+export function leavesMoving(leaves){return leaves.some(l=>Math.hypot(l.vx,l.vy)>.2||Math.abs(l.spin)>.2||l.lift>.1||l.pinned>0);}
